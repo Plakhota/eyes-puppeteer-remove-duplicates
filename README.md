@@ -51,35 +51,22 @@ set APPLITOOLS_API_KEY="[Your Key]"
 npm test
 ```
 
-## 🧐 What's inside?
-
-### Test Examples
-
-This repository includes a variety of examples on how you can use Applitools Eyes with your Puppeteer project.
-
-- Basic: running the Eyes SDK without a manually configured runner
-- Classic: running the Eyes SDK with the Classic runner (locally)
-- Ultrafast: running the Eyes SDK with the Applitools Ultrafast Grid (cloud)
-
-### GitHub Action Workflows
-
-Also included are two separate GitHub Actions.
-
-- tests.yml: runs the suite of tests whenever changes are pushed to the main branch or whenever a pull request is targeted to the main branch
-- updates.yml: runs daily via cron schedule updating all project dependencies
-
-Note: updates.yml is intended to be a tool for Applitools to maintain this tutorial with its limited depedencies and scope. It's not recommended to automatically upgrade all dependencies without process and proper review.
-
-## 👀 Add Applitools Eyes to your Puppeteer project
-
-Learn more about how to install and integrate the Eyes SDK with our [Puppeteer tutorial](https://applitools.com/tutorials/puppeteer.html)!
-
-<https://applitools.com/tutorials/puppeteer.html>
-
-## 🧰 More Information
-
 Learn more about Applitools [Eyes](https://info.applitools.com/ucY77) and the [Ultrafast Test Cloud](https://info.applitools.com/ucY78) at [applitools.com](https://info.applitools.com/ucY76).
 
 More about the Eyes Puppeteer SDK:
 * https://www.npmjs.com/package/@applitools/eyes-puppeteer
 * https://applitools.com/docs/api/eyes-sdk/index-gen/classindex-puppeteer-javascript.html
+
+
+## Remove duplicates
+If Mocha is configured to retry a failed test (https://mochajs.org/#retry-tests), then double Applitools test entries may appear in Applitools dashboard, since there were double the calls to eyes.open, eyes.check, eyes,close for the same test case.
+In the following test file
+https://github.com/Plakhota/eyes-puppeteer-remove-duplicates/blob/main/test/example-ultrafast.test.js 
+a loop was added in afterAll hook.
+It should run after ```await runner.getAllTestResults(false) //(false means no expection is raised on visual diff)```
+The loop looks for pairs of tests that share the same baseline configuration (Applitools test name, app name, OS&browser, viewport size) and deletes the first try, if it was unsuccessful. (Please note the Utility function haveSameApplitoolsBaseline that returns true if two tests have the same baseline).
+
+##How to add duplicate deletion to your suite?
+1. The relevant case is a test by test retry with a shared beforeAll, afterAll hook, share Runner object. The Runner object manages all the Eyes result from the describe file. 
+2. Use the after hook from the demo suite. Of course, other tear-downs can be added.
+3. Make sure the ```haveSameApplitoolsBaseline definition``` is available in the test suite file.
